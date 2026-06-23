@@ -1,0 +1,18 @@
+{
+  "alertLevel": "green",
+  "displayMode": "slide",
+  "awayLocation": "Hopital cantonal de Fribourg",
+  "welcomeSubtext": "Nous sommes en service !",
+  "welcomeDur": 8,
+  "ads": [
+    {
+      "id": 2,
+      "name": "Publicite 1",
+      "type": "text",
+      "headline": "Votre publicite ici",
+      "subtext": "Contactez-nous",
+      "color": "#0d3b1a",
+      "dur": 5
+    }
+  ]
+}
