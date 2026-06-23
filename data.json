@@ -1,6 +1,6 @@
 {
   "alertLevel": "red",
-  "displayMode": "away",
+  "displayMode": "slide",
   "awayLocation": "Hopital cantonal de Fribourg",
   "welcomeSubtext": "Kakou kakou",
   "welcomeDur": 8,
