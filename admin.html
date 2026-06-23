@@ -7,16 +7,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0f0f1e;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);
-  --accent:#4a90d9;--green:#2ecc71;--orange:#f39c12;--red:#c0392b;--muted:rgba(255,255,255,0.55);--radius:10px;
-}
+:root{--bg:#0f0f1e;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#4a90d9;--green:#2ecc71;--orange:#f39c12;--red:#c0392b;--muted:rgba(255,255,255,0.55);--radius:10px}
 html,body{min-height:100%;background:var(--bg);color:#fff;font-family:'Helvetica Neue',Arial,sans-serif}
 a{color:var(--accent);text-decoration:none}
 .topbar{position:sticky;top:0;background:rgba(13,13,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-logo{height:36px;width:36px;object-fit:contain}
-.topbar-title{font-size:17px;font-weight:600;letter-spacing:.3px}
+.topbar-title{font-size:17px;font-weight:600}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .status-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--muted)}
 .status-pill .sdot{width:8px;height:8px;border-radius:50%}
@@ -24,8 +21,6 @@ a{color:var(--accent);text-decoration:none}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px}
 .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .card-title i{font-size:15px}
-.token-row{display:flex;gap:10px;align-items:center}
-.token-hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
 .alert-row{display:flex;gap:10px;flex-wrap:wrap}
 .alert-btn{flex:1;min-width:120px;padding:13px 10px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .2s;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.65)}
 .alert-btn .bdot{width:10px;height:10px;border-radius:50%}
@@ -109,28 +104,11 @@ a{color:var(--accent);text-decoration:none}
     <span class="topbar-title">Administration SAMS</span>
   </div>
   <div class="topbar-right">
-    <div class="status-pill">
-      <div class="sdot" id="sync-dot" style="background:#e74c3c"></div>
-      <span id="sync-label">Non connect&eacute;</span>
-    </div>
+    <div class="status-pill"><div class="sdot" id="sync-dot" style="background:#e74c3c"></div><span id="sync-label">Non connecte</span></div>
     <a href="index.html" target="_blank" class="btn-secondary"><i class="ti ti-external-link"></i> Affichage</a>
   </div>
 </div>
-
 <div class="body">
-
-  <div class="card">
-    <div class="card-title"><i class="ti ti-key"></i> Token GitHub</div>
-    <div class="token-row">
-      <input type="password" class="field-input" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="saveToken()">
-      <button class="btn-primary" onclick="testAndLoad()"><i class="ti ti-plug"></i> Connecter</button>
-    </div>
-    <div class="token-hint">
-      Cr&eacute;e un token sur <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens</a>
-      &rarr; Fine-grained &rarr; repo <strong>SAMS-display</strong> &rarr; Contents Read &amp; Write.<br>
-      Le token est sauvegard&eacute; uniquement dans ce navigateur.
-    </div>
-  </div>
 
   <div class="card">
     <div class="card-title"><i class="ti ti-alert-triangle"></i> Niveau d&rsquo;alerte</div>
@@ -139,7 +117,7 @@ a{color:var(--accent);text-decoration:none}
       <button class="alert-btn" id="ab-orange" onclick="setAlert('orange')"><span class="bdot" style="background:#f39c12"></span> Orange &mdash; Vigilance</button>
       <button class="alert-btn" id="ab-red" onclick="setAlert('red')"><span class="bdot" style="background:#c0392b"></span> Rouge &mdash; Urgence</button>
     </div>
-    <div class="hint"><i class="ti ti-info-circle"></i> Rouge remplace le diaporama par l&rsquo;&eacute;cran d&rsquo;urgence.</div>
+    <div class="hint"><i class="ti ti-info-circle"></i> Rouge remplace le diaporama par l&rsquo;ecran d&rsquo;urgence.</div>
   </div>
 
   <div class="card">
@@ -147,11 +125,11 @@ a{color:var(--accent);text-decoration:none}
     <div class="mode-grid">
       <button class="mode-btn" id="mb-closed" onclick="toggleMode('closed')">
         <i class="ti ti-door-off"></i>
-        <div><div class="mode-btn-label">SAMS Ferm&eacute;</div><div class="mode-btn-sub">Aucun m&eacute;decin disponible</div></div>
+        <div><div class="mode-btn-label">SAMS Ferme</div><div class="mode-btn-sub">Aucun medecin disponible</div></div>
       </button>
       <button class="mode-btn" id="mb-away" onclick="toggleMode('away')">
         <i class="ti ti-map-pin"></i>
-        <div><div class="mode-btn-label">Nous sommes ailleurs</div><div class="mode-btn-sub">Pr&eacute;ciser l&rsquo;emplacement</div></div>
+        <div><div class="mode-btn-label">Nous sommes ailleurs</div><div class="mode-btn-sub">Preciser l&rsquo;emplacement</div></div>
       </button>
     </div>
     <div class="away-row" id="away-row">
@@ -165,7 +143,7 @@ a{color:var(--accent);text-decoration:none}
     <div class="welcome-fields">
       <div><div class="field-label">Texte sous le logo</div><input type="text" class="field-input" id="welcome-subtext" placeholder="Nous sommes en service !"></div>
       <div>
-        <div class="field-label">Dur&eacute;e</div>
+        <div class="field-label">Duree</div>
         <div class="dur-row">
           <input type="range" min="3" max="30" value="8" step="1" id="welcome-dur" oninput="document.getElementById('welcome-dur-out').textContent=this.value+'s'">
           <span class="dur-val" id="welcome-dur-out">8s</span>
@@ -202,7 +180,7 @@ a{color:var(--accent);text-decoration:none}
           </div>
         </div>
         <div>
-          <div class="field-label">Dur&eacute;e</div>
+          <div class="field-label">Duree</div>
           <div class="dur-row">
             <input type="range" min="3" max="30" value="6" step="1" id="new-dur" oninput="document.getElementById('new-dur-out').textContent=this.value+'s'">
             <span class="dur-val" id="new-dur-out">6s</span>
@@ -231,7 +209,7 @@ a{color:var(--accent);text-decoration:none}
       <div><div class="field-label">Couleur de fond</div><div class="color-row" id="edit-color-row"></div></div>
     </div>
     <div>
-      <div class="field-label">Dur&eacute;e</div>
+      <div class="field-label">Duree</div>
       <div class="dur-row">
         <input type="range" min="3" max="30" value="6" step="1" id="edit-dur" oninput="document.getElementById('edit-dur-out').textContent=this.value+'s'">
         <span class="dur-val" id="edit-dur-out">6s</span>
@@ -243,103 +221,61 @@ a{color:var(--accent);text-decoration:none}
     </div>
   </div>
 </div>
-
-<div class="saving-overlay" id="saving-overlay">
-  <div class="saving-box"><div class="spinner"></div> Sauvegarde...</div>
-</div>
-
+<div class="saving-overlay" id="saving-overlay"><div class="saving-box"><div class="spinner"></div> Sauvegarde...</div></div>
 <div id="toast"></div>
 
 <script>
-var GH_API = "https://api.github.com/repos/talamana/SAMS-display/contents/data.json";
-var GH_BRANCH = "main";
+var SUPA_API = "https://jjgwtnkmztghgvneurzb.supabase.co/rest/v1/sams_state";
+var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZ3d0bmttenRnaGd2bmV1cnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjM4MDksImV4cCI6MjA5NzczOTgwOX0.NY-GjgMGQ1l7oMNFbHWOEsceE_bWk-oe6HCcJzMu0Cc";
 var BG_COLORS = ['#0d1b3e','#0d3b1a','#3b0d0d','#1a0d3b','#0d2e3b','#3b2a0d','#1e1e2e','#2e1e1e','#3d0000','#1a3d00'];
 var newAdType = 'image';
 var newAdColor = '#0d1b3e';
 var editAdColor = '#0d1b3e';
 var nextId = 100;
-var currentSha = null;
+var rowId = null;
 var appData = {alertLevel:'green',displayMode:'slide',awayLocation:'',welcomeSubtext:'Nous sommes en service !',welcomeDur:8,ads:[]};
 
-// TOKEN
-function getToken() { return localStorage.getItem('sams_token') || ''; }
-function saveToken() { localStorage.setItem('sams_token', document.getElementById('token-input').value.trim()); }
-
-window.addEventListener('load', function() {
-  var t = getToken();
-  if (t) { document.getElementById('token-input').value = t; testAndLoad(); }
-  buildSwatches('color-row', newAdColor, function(c) { newAdColor = c; });
-  selectType('image');
-});
-
-// GITHUB API
-function ghGet(cb) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', GH_API, true);
-  xhr.setRequestHeader('Authorization', 'token ' + getToken());
-  xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      try {
-        var res = JSON.parse(xhr.responseText);
-        var raw = atob(res.content.replace(/\n/g, ''));
-        var decoded = decodeURIComponent(escape(raw));
-        cb(null, JSON.parse(decoded), res.sha);
-      } catch(e) { cb('Erreur parsing: ' + e.message); }
-    } else {
-      cb('Erreur ' + xhr.status + ' — verifie le token et le depot.');
-    }
+function supaHeaders() {
+  return {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
   };
-  xhr.onerror = function() { cb('Erreur reseau.'); };
-  xhr.send();
 }
 
-function ghPut(data, sha, cb) {
-  showSaving(true);
-  var json = JSON.stringify(data, null, 2);
-  var encoded = btoa(unescape(encodeURIComponent(json)));
-  var body = JSON.stringify({message: 'SAMS admin update', content: encoded, sha: sha, branch: GH_BRANCH});
-  var xhr = new XMLHttpRequest();
-  xhr.open('PUT', GH_API, true);
-  xhr.setRequestHeader('Authorization', 'token ' + getToken());
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
-  xhr.onload = function() {
-    showSaving(false);
-    if (xhr.status === 200 || xhr.status === 201) {
-      var res = JSON.parse(xhr.responseText);
-      currentSha = res.content.sha;
-      cb(null);
-    } else {
-      cb('Erreur ' + xhr.status);
-    }
-  };
-  xhr.onerror = function() { showSaving(false); cb('Erreur reseau'); };
-  xhr.send(body);
-}
-
-function testAndLoad() {
+function loadData() {
   setSyncStatus('loading');
-  ghGet(function(err, data, sha) {
-    if (err) { setSyncStatus('error'); showToast(err, true); return; }
-    currentSha = sha;
-    appData = data;
-    if (!appData.ads) appData.ads = [];
-    applyToUI();
-    setSyncStatus('ok');
-    showToast('Connecte — donnees chargees');
-  });
+  fetch(SUPA_API + '?select=id,data&limit=1', {headers: supaHeaders()})
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (!rows || !rows.length) { setSyncStatus('error'); showToast('Aucune donnee trouvee dans Supabase.', true); return; }
+      rowId = rows[0].id;
+      appData = JSON.parse(rows[0].data);
+      if (!appData.ads) appData.ads = [];
+      applyToUI();
+      setSyncStatus('ok');
+      showToast('Connecte');
+    })
+    .catch(function(e) { setSyncStatus('error'); showToast('Erreur connexion Supabase', true); });
 }
 
 function save(msg) {
-  if (!currentSha) { showToast('Connecte-toi avec ton token.', true); return; }
-  ghPut(appData, currentSha, function(err) {
-    if (err) { showToast(err, true); }
-    else { showToast(msg || 'Sauvegarde — ecran mis a jour dans ~5s'); }
-  });
+  if (!rowId) { showToast('Pas encore charge.', true); return; }
+  showSaving(true);
+  fetch(SUPA_API + '?id=eq.' + rowId, {
+    method: 'PATCH',
+    headers: supaHeaders(),
+    body: JSON.stringify({data: JSON.stringify(appData)})
+  })
+    .then(function(r) {
+      showSaving(false);
+      if (r.ok) { showToast(msg || 'Sauvegarde — ecran mis a jour instantanement'); }
+      else { r.text().then(function(t){ showToast('Erreur: ' + t, true); }); }
+    })
+    .catch(function(e) { showSaving(false); showToast('Erreur reseau', true); });
 }
 
-// APPLY TO UI
 function applyToUI() {
   ['green','orange','red'].forEach(function(l) {
     document.getElementById('ab-' + l).className = 'alert-btn' + (l === appData.alertLevel ? ' sel-' + l : '');
@@ -354,7 +290,6 @@ function applyToUI() {
   renderAds();
 }
 
-// ALERT
 function setAlert(level) {
   appData.alertLevel = level;
   ['green','orange','red'].forEach(function(l) {
@@ -363,7 +298,6 @@ function setAlert(level) {
   save('Alerte mise a jour');
 }
 
-// MODE
 function toggleMode(mode) {
   appData.displayMode = (appData.displayMode === mode) ? 'slide' : mode;
   document.getElementById('mb-closed').className = 'mode-btn' + (appData.displayMode === 'closed' ? ' active-closed' : '');
@@ -377,45 +311,40 @@ function applyAway() {
   save('Emplacement mis a jour');
 }
 
-// WELCOME
 function saveWelcome() {
   appData.welcomeSubtext = document.getElementById('welcome-subtext').value.trim() || 'Nous sommes en service !';
   appData.welcomeDur = parseInt(document.getElementById('welcome-dur').value);
-  save('Diapositive accueil mise a jour');
+  save('Accueil mis a jour');
 }
 
-// ADS
 function renderAds() {
-  var list = document.getElementById('ads-list');
-  list.innerHTML = '';
+  var list = document.getElementById('ads-list'); list.innerHTML = '';
   (appData.ads || []).forEach(function(ad) {
-    var row = document.createElement('div');
-    row.className = 'ad-row';
+    var row = document.createElement('div'); row.className = 'ad-row';
+    var bgc = ad.color || '#0d1b3e';
     var preview;
     if (ad.type === 'image') {
-      preview = '<div class="ad-preview"><img src="' + esc(ad.imageUrl) + '" onerror="this.style.display=\'none\'"></div>';
+      preview = '<div class="ad-preview"><img src="' + esc(ad.imageUrl) + '" style="width:100%;height:100%;object-fit:cover"></div>';
     } else {
-      preview = '<div class="ad-preview" style="background:' + (ad.color || '#0d1b3e') + '"><i class="ti ti-text-size"></i></div>';
+      preview = '<div class="ad-preview" style="background:' + bgc + '"><i class="ti ti-text-size"></i></div>';
     }
     row.innerHTML = preview
       + '<div class="ad-info"><div class="ad-name">' + esc(ad.name) + '</div>'
       + '<div class="ad-meta">' + (ad.type === 'image' ? 'Image' : 'Texte') + ' · ' + ad.dur + 's</div></div>'
       + '<div class="ad-actions">'
-      + '<button class="ad-btn" onclick="openEdit(' + ad.id + ')" title="Modifier"><i class="ti ti-pencil"></i></button>'
-      + '<button class="ad-btn del" onclick="deleteAd(' + ad.id + ')" title="Supprimer"><i class="ti ti-trash"></i></button>'
+      + '<button class="ad-btn" onclick="openEdit(' + ad.id + ')"><i class="ti ti-pencil"></i></button>'
+      + '<button class="ad-btn del" onclick="deleteAd(' + ad.id + ')"><i class="ti ti-trash"></i></button>'
       + '</div>';
     list.appendChild(row);
   });
 }
 
 function deleteAd(id) {
-  if (!confirm('Supprimer cette diapositive ?')) return;
+  if (!confirm('Supprimer ?')) return;
   appData.ads = (appData.ads || []).filter(function(a) { return a.id !== id; });
-  renderAds();
-  save('Diapositive supprimee');
+  renderAds(); save('Diapositive supprimee');
 }
 
-// ADD
 function toggleAddForm() { document.getElementById('add-body').classList.toggle('open'); }
 
 function selectType(t) {
@@ -446,8 +375,7 @@ function addAd() {
     ad.color = newAdColor;
   }
   if (!appData.ads) appData.ads = [];
-  appData.ads.push(ad);
-  renderAds();
+  appData.ads.push(ad); renderAds();
   document.getElementById('new-name').value = '';
   document.getElementById('new-image-url').value = '';
   document.getElementById('new-headline').value = '';
@@ -457,7 +385,6 @@ function addAd() {
   save('Diapositive ajoutee');
 }
 
-// EDIT MODAL
 function openEdit(id) {
   var ad = (appData.ads || []).find(function(a) { return a.id === id; });
   if (!ad) return;
@@ -502,16 +429,11 @@ function saveEdit() {
     ad.subtext = document.getElementById('edit-subtext').value;
     ad.color = editAdColor;
   }
-  closeEdit();
-  renderAds();
-  save('Diapositive modifiee');
+  closeEdit(); renderAds(); save('Diapositive modifiee');
 }
 
-// HELPERS
 function buildSwatches(rowId, selected, onSelect) {
-  var row = document.getElementById(rowId);
-  if (!row) return;
-  row.innerHTML = '';
+  var row = document.getElementById(rowId); if (!row) return; row.innerHTML = '';
   BG_COLORS.forEach(function(c) {
     var sw = document.createElement('div');
     sw.className = 'swatch' + (c === selected ? ' selected' : '');
@@ -525,30 +447,29 @@ function buildSwatches(rowId, selected, onSelect) {
   });
 }
 
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function setSyncStatus(s) {
-  var dot = document.getElementById('sync-dot');
-  var lbl = document.getElementById('sync-label');
+  var dot = document.getElementById('sync-dot'), lbl = document.getElementById('sync-label');
   if (s === 'ok') { dot.style.background = '#2ecc71'; lbl.textContent = 'Connecte'; }
   else if (s === 'loading') { dot.style.background = '#f39c12'; lbl.textContent = 'Connexion...'; }
-  else { dot.style.background = '#e74c3c'; lbl.textContent = 'Non connecte'; }
+  else { dot.style.background = '#e74c3c'; lbl.textContent = 'Erreur'; }
 }
 
 function showToast(msg, isError) {
   var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show' + (isError ? ' error' : '');
+  t.textContent = msg; t.className = 'show' + (isError ? ' error' : '');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(function() { t.className = ''; }, 3500);
 }
 
-function showSaving(v) {
-  document.getElementById('saving-overlay').className = 'saving-overlay' + (v ? ' show' : '');
-}
+function showSaving(v) { document.getElementById('saving-overlay').className = 'saving-overlay' + (v ? ' show' : ''); }
+
+window.addEventListener('load', function() {
+  buildSwatches('color-row', newAdColor, function(c) { newAdColor = c; });
+  selectType('image');
+  loadData();
+});
 </script>
 </body>
 </html>
