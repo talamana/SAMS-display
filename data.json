@@ -1,5 +1,5 @@
 {
-  "alertLevel": "green",
+  "alertLevel": "red",
   "displayMode": "away",
   "awayLocation": "Hopital cantonal de Fribourg",
   "welcomeSubtext": "Kakou kakou",
