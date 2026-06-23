@@ -1,5 +1,5 @@
 {
-  "alertLevel": "green",
+  "alertLevel": "red",
   "displayMode": "slide",
   "awayLocation": "Hopital cantonal de Fribourg",
   "welcomeSubtext": "Nous sommes en service !",
