@@ -535,27 +535,7 @@
 </head>
 <body>
 
-<!-- CONFIG OVERLAY -->
-<div id="config-overlay">
-  <div class="config-box">
-    <h2>
-      <div class="logo-cross" style="width:28px;height:28px;flex-shrink:0"></div>
-      SAMS – Configuration Supabase
-    </h2>
-    <p>Entrez vos identifiants Supabase pour activer la synchronisation en temps réel entre tous les utilisateurs.</p>
-    <div class="config-field">
-      <label>Supabase URL</label>
-      <input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co" />
-    </div>
-    <div class="config-field">
-      <label>Anon Key</label>
-      <input id="cfg-key" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
-    </div>
-    <button class="config-btn" onclick="initSupabase()">Connecter</button>
-    <button class="demo-btn" onclick="startDemo()">Mode démonstration (local uniquement)</button>
-    <div class="config-note">Les identifiants sont stockés localement dans votre navigateur.</div>
-  </div>
-</div>
+
 
 <!-- HEADER -->
 <header>
@@ -728,6 +708,10 @@
 <div id="toast"></div>
 
 <script>
+// ── Supabase config ──
+const SB_URL = 'https://jjgwtnkmztghgvneurzb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZ3d0bmttenRnaGd2bmV1cnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjM4MDksImV4cCI6MjA5NzczOTgwOX0.NY-GjgMGQ1l7oMNFbHWOEsceE_bWk-oe6HCcJzMu0Cc';
+
 // ── State ──
 const ROOMS = ['369','370','372','373','374','traitement'];
 const BEDS  = ['371-1','371-2','371-3'];
@@ -749,32 +733,15 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── Config persistence ──
-function loadSavedConfig() {
-  const url = localStorage.getItem('sams_sb_url');
-  const key = localStorage.getItem('sams_sb_key');
-  if (url) document.getElementById('cfg-url').value = url;
-  if (key) document.getElementById('cfg-key').value = key;
-  if (url && key) initSupabase();
-}
-
+// ── Auto-init Supabase ──
 async function initSupabase() {
-  const url = document.getElementById('cfg-url').value.trim();
-  const key = document.getElementById('cfg-key').value.trim();
-  if (!url || !key) { showToast('⚠ URL et clé requis'); return; }
-
-  localStorage.setItem('sams_sb_url', url);
-  localStorage.setItem('sams_sb_key', key);
-
   try {
-    supabaseClient = supabase.createClient(url, key);
+    supabaseClient = supabase.createClient(SB_URL, SB_KEY);
     await setupSupabase();
-    document.getElementById('config-overlay').style.display = 'none';
     setSyncStatus(true);
-    showToast('✓ Connecté à Supabase');
   } catch(e) {
-    showToast('✗ Erreur: ' + e.message);
     setSyncStatus(false);
+    showToast('✗ Erreur Supabase: ' + e.message);
   }
 }
 
@@ -807,10 +774,8 @@ async function setupSupabase() {
 
 function startDemo() {
   demoMode = true;
-  document.getElementById('config-overlay').style.display = 'none';
   setSyncStatus(false, 'Mode démo');
   renderAll();
-  showToast('Mode démonstration — modifications locales uniquement');
 }
 
 function setSyncStatus(ok, label) {
@@ -885,7 +850,7 @@ function showToast(msg) {
 
 // ── Init ──
 updateStats();
-loadSavedConfig();
+initSupabase();
 </script>
 </body>
 </html>
