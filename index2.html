@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>SAMS – Gestion des Chambres</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --border-bright: #484f58;
+    --free: #1c2128;
+    --free-border: #3d4a5c;
+    --occupied: #3d0a0a;
+    --occupied-border: #c0392b;
+    --occupied-text: #ff6b6b;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --red: #e53e3e;
+    --red-bright: #fc5c5c;
+    --green: #2ea043;
+    --accent: #238be6;
+    --corridor: #0a0d12;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  html, body {
+    width: 1920px;
+    min-height: 1080px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 80px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-cross {
+    width: 42px;
+    height: 42px;
+    position: relative;
+  }
+
+  .logo-cross::before, .logo-cross::after {
+    content: '';
+    position: absolute;
+    background: var(--red);
+    border-radius: 3px;
+  }
+  .logo-cross::before { width: 12px; height: 42px; left: 15px; top: 0; }
+  .logo-cross::after  { width: 42px; height: 12px; left: 0; top: 15px; }
+
+  .logo-text {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  #clock {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+  }
+  .dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-dot 2s infinite; }
+  .dot.error { background: var(--red); }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .legend-swatch {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid;
+  }
+  .legend-swatch.free { background: var(--free); border-color: var(--free-border); }
+  .legend-swatch.occ  { background: var(--occupied); border-color: var(--occupied-border); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 0 48px;
+    height: 52px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .stat-val {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  .stat-val.red { color: var(--red-bright); }
+  .stat-val.green { color: #4ec96c; }
+
+  .stat-sep { width: 1px; height: 28px; background: var(--border); }
+
+  /* ── FLOOR PLAN ── */
+  .floor-wrap {
+    padding: 40px 48px;
+    height: calc(1080px - 80px - 52px);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .floor-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* Corridor cross layout */
+  .map {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr;
+    grid-template-rows: 1fr 32px 1fr;
+    gap: 0;
+  }
+
+  /* Corridor cells */
+  .corridor-v { background: var(--corridor); border-left: 1px solid #1a1f27; border-right: 1px solid #1a1f27; }
+  .corridor-h { background: var(--corridor); border-top: 1px solid #1a1f27; border-bottom: 1px solid #1a1f27; }
+  .corridor-x { background: var(--corridor); }
+
+  /* Quadrant grids */
+  .quadrant {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Q1: top-left — rooms 371(3 lits), 369, 370 */
+  .q1 { grid-column: 1; grid-row: 1; }
+  .q2 { grid-column: 3; grid-row: 1; }
+  .q3 { grid-column: 1; grid-row: 3; }
+  .q4 { grid-column: 3; grid-row: 3; }
+
+  .room-row {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+  }
+
+  /* ── ROOM CARD ── */
+  .room {
+    flex: 1;
+    background: var(--free);
+    border: 2px solid var(--free-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    user-select: none;
+  }
+
+  .room:hover {
+    border-color: var(--border-bright);
+    background: #1f2733;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  }
+
+  .room.occupied {
+    background: var(--occupied);
+    border-color: var(--occupied-border);
+    box-shadow: 0 0 20px rgba(192,57,43,.25);
+  }
+
+  .room.occupied:hover {
+    background: #4d0d0d;
+    border-color: var(--red-bright);
+    box-shadow: 0 0 28px rgba(252,92,92,.3);
+  }
+
+  .room-number {
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--text-muted);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    transition: color .15s;
+    font-family: var(--mono);
+  }
+
+  .room.occupied .room-number {
+    color: var(--occupied-text);
+  }
+
+  .room-status {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3d4a5c;
+    transition: color .15s;
+  }
+
+  .room.occupied .room-status {
+    color: var(--occupied-border);
+  }
+
+  /* Status icon */
+  .room-icon {
+    width: 32px; height: 32px;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .room.occupied .room-icon { opacity: 1; }
+
+  /* ── 371 special: 3 beds ── */
+  .room-371 {
+    flex: 1;
+    background: var(--free);
+    border: 2px solid var(--free-border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .room-371-header {
+    padding: 8px 16px;
+    background: #1a2030;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .room-371-num {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  .room-371-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .beds-container {
+    display: flex;
+    flex: 1;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .bed {
+    flex: 1;
+    background: var(--free);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background .15s;
+    position: relative;
+  }
+
+  .bed:hover { background: #1f2733; }
+  .bed.occupied { background: var(--occupied); }
+  .bed.occupied:hover { background: #4d0d0d; }
+
+  .bed-num {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    transition: color .15s;
+  }
+
+  .bed.occupied .bed-num { color: var(--occupied-text); }
+
+  .bed-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3d4a5c;
+    transition: color .15s;
+  }
+  .bed.occupied .bed-label { color: var(--occupied-border); }
+
+  /* bed icon */
+  .bed-icon {
+    width: 20px; height: 20px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .bed.occupied .bed-icon { opacity: 1; }
+
+  /* ── TRAITEMENT room (special label, no number toggle) ── */
+  .room-traitement .room-number {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--mono);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 999;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── CONFIG OVERLAY ── */
+  #config-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .config-box {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 16px;
+    padding: 40px;
+    width: 480px;
+  }
+
+  .config-box h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .config-box p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .config-field {
+    margin-bottom: 16px;
+  }
+
+  .config-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .config-field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: var(--mono);
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  .config-field input:focus { border-color: var(--accent); }
+
+  .config-btn {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background .15s;
+  }
+  .config-btn:hover { background: #1a78d4; }
+
+  .config-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  /* Demo mode */
+  .demo-btn {
+    width: 100%;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background .15s, color .15s;
+  }
+  .demo-btn:hover { background: var(--surface2); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- CONFIG OVERLAY -->
+<div id="config-overlay">
+  <div class="config-box">
+    <h2>
+      <div class="logo-cross" style="width:28px;height:28px;flex-shrink:0"></div>
+      SAMS – Configuration Supabase
+    </h2>
+    <p>Entrez vos identifiants Supabase pour activer la synchronisation en temps réel entre tous les utilisateurs.</p>
+    <div class="config-field">
+      <label>Supabase URL</label>
+      <input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co" />
+    </div>
+    <div class="config-field">
+      <label>Anon Key</label>
+      <input id="cfg-key" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+    </div>
+    <button class="config-btn" onclick="initSupabase()">Connecter</button>
+    <button class="demo-btn" onclick="startDemo()">Mode démonstration (local uniquement)</button>
+    <div class="config-note">Les identifiants sont stockés localement dans votre navigateur.</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-cross"></div>
+    <div>
+      <div class="logo-text">SAMS</div>
+      <div class="logo-sub">Service d'Aide Médicale et de Secours</div>
+    </div>
+  </div>
+
+  <div class="header-center">
+    <span id="date-display"></span> &nbsp;|&nbsp; <span id="clock">--:--:--</span>
+  </div>
+
+  <div class="header-right">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch free"></div> Libre</div>
+      <div class="legend-item"><div class="legend-swatch occ"></div> Occupé</div>
+    </div>
+    <div class="status-pill">
+      <div class="dot" id="sync-dot"></div>
+      <span id="sync-label">Hors ligne</span>
+    </div>
+  </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat">
+    <span>Lits totaux</span>
+    <span class="stat-val" id="stat-total">—</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span>Occupés</span>
+    <span class="stat-val red" id="stat-occ">—</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span>Libres</span>
+    <span class="stat-val green" id="stat-free">—</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span>Taux d'occupation</span>
+    <span class="stat-val" id="stat-rate">—</span>
+  </div>
+</div>
+
+<!-- FLOOR PLAN -->
+<div class="floor-wrap">
+  <div class="floor-label">Plan des chambres — Étage principal</div>
+
+  <div class="map">
+
+    <!-- Q1: Top-Left — 371 (3 lits), 369, 370 -->
+    <div class="quadrant q1" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Row 1: room 371 with 3 beds -->
+      <div class="room-row" style="flex:1;">
+        <div class="room-371" id="room-371-wrap">
+          <div class="room-371-header">
+            <span class="room-371-num">371</span>
+            <span class="room-371-label">3 lits</span>
+          </div>
+          <div class="beds-container">
+            <div class="bed" id="bed-371-1" data-id="371-1" onclick="toggleBed('371-1')">
+              <svg class="bed-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+                <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+              </svg>
+              <span class="bed-num">1</span>
+              <span class="bed-label">Libre</span>
+            </div>
+            <div class="bed" id="bed-371-2" data-id="371-2" onclick="toggleBed('371-2')">
+              <svg class="bed-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+                <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+              </svg>
+              <span class="bed-num">2</span>
+              <span class="bed-label">Libre</span>
+            </div>
+            <div class="bed" id="bed-371-3" data-id="371-3" onclick="toggleBed('371-3')">
+              <svg class="bed-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+                <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+              </svg>
+              <span class="bed-num">3</span>
+              <span class="bed-label">Libre</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: 369, 370 -->
+      <div class="room-row" style="flex:1;">
+        <div class="room" id="room-369" data-id="369" onclick="toggleRoom('369')">
+          <svg class="room-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+            <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+          </svg>
+          <span class="room-number">369</span>
+          <span class="room-status">Libre</span>
+        </div>
+        <div class="room" id="room-370" data-id="370" onclick="toggleRoom('370')">
+          <svg class="room-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+            <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+          </svg>
+          <span class="room-number">370</span>
+          <span class="room-status">Libre</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vertical corridor -->
+    <div class="corridor-v" style="grid-column:2;grid-row:1/4;"></div>
+
+    <!-- Q2: Top-Right — 372, 373, 374 -->
+    <div class="quadrant q2" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Row 1: 372 full width -->
+      <div class="room-row" style="flex:1;">
+        <div class="room" id="room-372" data-id="372" onclick="toggleRoom('372')">
+          <svg class="room-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+            <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+          </svg>
+          <span class="room-number">372</span>
+          <span class="room-status">Libre</span>
+        </div>
+      </div>
+      <!-- Row 2: 373, 374 -->
+      <div class="room-row" style="flex:1;">
+        <div class="room" id="room-373" data-id="373" onclick="toggleRoom('373')">
+          <svg class="room-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+            <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+          </svg>
+          <span class="room-number">373</span>
+          <span class="room-status">Libre</span>
+        </div>
+        <div class="room" id="room-374" data-id="374" onclick="toggleRoom('374')">
+          <svg class="room-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+            <path d="M3 7v11M21 7v11M3 12h18M7 7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5H7V7z"/>
+          </svg>
+          <span class="room-number">374</span>
+          <span class="room-status">Libre</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Horizontal corridor -->
+    <div class="corridor-h" style="grid-column:1;grid-row:2;"></div>
+    <div class="corridor-x" style="grid-column:2;grid-row:2;"></div>
+    <div class="corridor-h" style="grid-column:3;grid-row:2;"></div>
+
+    <!-- Q3: Bottom-Left — vide -->
+    <div class="q3" style="background:var(--corridor);"></div>
+
+    <!-- Q4: Bottom-Right — TRAITEMENT uniquement -->
+    <div class="quadrant q4" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="room-row" style="flex:1;">
+        <div class="room" id="room-traitement" data-id="traitement" onclick="toggleRoom('traitement')">
+          <svg class="room-icon" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span class="room-number" style="font-size:22px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;">TRAITEMENT</span>
+          <span class="room-status">Libre</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── State ──
+const ROOMS = ['369','370','372','373','374','traitement'];
+const BEDS  = ['371-1','371-2','371-3'];
+const ALL   = [...ROOMS, ...BEDS];
+
+let state = {};
+ALL.forEach(id => state[id] = false);
+
+let supabaseClient = null;
+let channel = null;
+let demoMode = false;
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('fr-CH');
+  document.getElementById('date-display').textContent = now.toLocaleDateString('fr-CH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Config persistence ──
+function loadSavedConfig() {
+  const url = localStorage.getItem('sams_sb_url');
+  const key = localStorage.getItem('sams_sb_key');
+  if (url) document.getElementById('cfg-url').value = url;
+  if (key) document.getElementById('cfg-key').value = key;
+  if (url && key) initSupabase();
+}
+
+async function initSupabase() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) { showToast('⚠ URL et clé requis'); return; }
+
+  localStorage.setItem('sams_sb_url', url);
+  localStorage.setItem('sams_sb_key', key);
+
+  try {
+    supabaseClient = supabase.createClient(url, key);
+    await setupSupabase();
+    document.getElementById('config-overlay').style.display = 'none';
+    setSyncStatus(true);
+    showToast('✓ Connecté à Supabase');
+  } catch(e) {
+    showToast('✗ Erreur: ' + e.message);
+    setSyncStatus(false);
+  }
+}
+
+async function setupSupabase() {
+  // Create table if needed (won't fail if exists)
+  // Load initial state
+  const { data, error } = await supabaseClient.from('sams_rooms').select('*');
+  if (!error && data) {
+    data.forEach(row => {
+      if (ALL.includes(row.room_id)) {
+        state[row.room_id] = row.occupied;
+      }
+    });
+    renderAll();
+  }
+
+  // Subscribe to realtime changes
+  channel = supabaseClient
+    .channel('sams_rooms_changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sams_rooms' }, payload => {
+      const { room_id, occupied } = payload.new || payload.old || {};
+      if (room_id && ALL.includes(room_id)) {
+        state[room_id] = occupied;
+        renderOne(room_id);
+        updateStats();
+      }
+    })
+    .subscribe();
+}
+
+function startDemo() {
+  demoMode = true;
+  document.getElementById('config-overlay').style.display = 'none';
+  setSyncStatus(false, 'Mode démo');
+  renderAll();
+  showToast('Mode démonstration — modifications locales uniquement');
+}
+
+function setSyncStatus(ok, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'dot ' + (ok ? 'connected' : 'error');
+  lbl.textContent = label || (ok ? 'Synchronisé' : 'Non connecté');
+}
+
+// ── Toggle ──
+async function toggleRoom(id) {
+  state[id] = !state[id];
+  renderOne(id);
+  updateStats();
+  if (!demoMode && supabaseClient) {
+    await supabaseClient.from('sams_rooms').upsert({ room_id: id, occupied: state[id] }, { onConflict: 'room_id' });
+  }
+  showToast((state[id] ? '🔴 ' : '🟢 ') + idToName(id) + (state[id] ? ' — Occupé' : ' — Libre'));
+}
+
+async function toggleBed(id) {
+  await toggleRoom(id);
+}
+
+function idToName(id) {
+  const names = {'bloc-gauche':'Salle d\'attente','traitement':'Salle Traitement','urgence':'Urgences'};
+  if (id.startsWith('371-')) return 'Chambre 371 – Lit ' + id.split('-')[1];
+  return names[id] || 'Chambre ' + id;
+}
+
+// ── Render ──
+function renderOne(id) {
+  const occ = state[id];
+  if (BEDS.includes(id)) {
+    const el = document.getElementById('bed-' + id);
+    if (!el) return;
+    el.classList.toggle('occupied', occ);
+    el.querySelector('.bed-label').textContent = occ ? 'Occupé' : 'Libre';
+  } else {
+    const el = document.getElementById('room-' + id);
+    if (!el) return;
+    el.classList.toggle('occupied', occ);
+    const statusEl = el.querySelector('.room-status');
+    if (statusEl) statusEl.textContent = occ ? 'Occupé' : 'Libre';
+  }
+}
+
+function renderAll() {
+  ALL.forEach(renderOne);
+  updateStats();
+}
+
+function updateStats() {
+  const total = ALL.length;
+  const occ = ALL.filter(id => state[id]).length;
+  const free = total - occ;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-occ').textContent = occ;
+  document.getElementById('stat-free').textContent = free;
+  document.getElementById('stat-rate').textContent = Math.round(occ / total * 100) + '%';
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Init ──
+updateStats();
+loadSavedConfig();
+</script>
+</body>
+</html>
